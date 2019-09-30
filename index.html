@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Home page</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script type="text/javascript" src="index.js"></script>
+</head>
+
+<body onload="setUpHomePage()">
+    <h1 id="titleHeader">Welcome to the your WAM page, </h1>
+
+    <br>
+
+    <div style="display: inline-block;width: 50%">
+        <form>
+
+            <br>
+
+            <p>Contacts added:</p>
+
+            <ul id="contactHolder">
+            </ul>
+
+            <br>
+
+            <textarea id="sendMessageText" placeholder="Input text here!"></textarea>
+
+            <br>
+
+        </form>
+
+        <button onclick="sendMessage()">SEND NOW!</button> <br>
+        
+        <input type="datetime-local" id="date">
+        
+        <button onclick="addToSchedule()">Schedule for later!</button>
+
+        <br>
+    </div>
+
+    <div id="contactSection" style="display: inline-block">
+
+        <div id="addToList" style="display: none;border: 1px solid; height: 50vh; width: 50vw">
+            <button onclick="createList()">Create list!</button>
+        </div>
+        
+        <div id="subList">
+
+            <button onclick="displayCreateList()">Create a list</button>
+
+            <h1>Subscription Lists</h1>
+            
+        </div>
+
+        <h1>Contacts</h1>
+        
+        <div id="allContacts">
+        </div>
+
+    </div>
+
+
+</body>
+
+<script>
+    function submit() {
+        alert('sorry');
+    }
+</script></html>
