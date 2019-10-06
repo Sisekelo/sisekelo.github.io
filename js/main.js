@@ -113,9 +113,9 @@ function sendMoney() {
             
             var receiverText = `Hi ${receiverName}, \n You have received ${amount} from ${senderName}. \n Reference: \n\n ${id}\n\n Collect it from any Zuka station. Make sure to bring your ID`
             
-            //sendSMS(senderNumber, senderText);
+            sendSMS(senderNumber, senderText);
             
-            //sendSMS(receiverNumber, receiverText);
+            sendSMS(receiverNumber, receiverText);
             
             alert("Money sent: unique id is: "+reference);
         }
