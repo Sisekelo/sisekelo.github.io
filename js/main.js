@@ -80,52 +80,155 @@ function sendMoney() {
     var senderName = document.getElementById("senderName").value;
     var senderID = encrypt(document.getElementById("senderID").value).toString();
     var senderNumber = document.getElementById("senderNumber").value;
-    var receiverName = document.getElementById("receiverName").value;
-    var receiverID = encrypt(document.getElementById("receiverID").value).toString();
     var receiverNumber = document.getElementById("receiverNumber").value;
-    var amount = document.getElementById("amount").value;
+    var amount = parseInt(document.getElementById("amount").value);
     var reference = Math.floor(Math.random()*90000) + 10000;
-
-   var data = JSON.stringify({
-      "fields": {
-        "SenderName": senderName,
-        "ReceiverName": receiverName,
-        "SenderNumber": senderNumber,
-        "SenderID": senderID,
-        "ReceiverID": receiverID,
-        "ReceiverNumber": receiverNumber,
-        "Amount": parseFloat(amount),
-        "Retrieved": "false",
-        "Reference": reference.toString()
-      }
-    });
-
-    var xhr = new XMLHttpRequest();
-
-    xhr.addEventListener("readystatechange", function () {
-        if (this.readyState === 4) {
-            console.log(this.responseText);
-            
+    
+    var uniqueID= Math.random().toString(36).substr(2, 9);
+    
+    
+    var db = firebase.firestore();
+    
+    var vendorAmount = parseInt(localStorage.amount);
+    var vendorNumber = localStorage.number;
+    
+    /*db.collection("transactions").doc(uniqueID).set({
+        senderName: senderName,
+        senderID: senderID,
+        SenderNumber: senderNumber,
+        receiverNumber: receiverNumber,
+        amount: amount,
+        retrieved: "false",
+        reference: reference.toString(),
+        timestamp: Date.now()
+    })
+        .then(function() {
+            console.log("Document successfully written!");
             //send sms to person with ID
-            var id = JSON.parse(this.responseText).id;
             
-            var senderText = `Hi ${senderName}, \n You just sent ${amount} to ${receiverName}. \n Reference number:\n\n ${id}. \n\n MAKE SURE ${receiverName} BRINGS AND ID TO COLLECT MONEY!`
+            var senderText = `Hi ${senderName}, \n You just sent ${amount} to ${receiverNumber}. \n Reference number:\n\n ${reference}. \n\n MAKE SURE YOUR FRIEND BRINGS AND ID TO COLLECT MONEY!`
             
-            var receiverText = `Hi ${receiverName}, \n You have received ${amount} from ${senderName}. \n Reference: \n\n ${id}\n\n Collect it from any Zuka station. Make sure to bring your ID`
+            var receiverText = `Hi there, \n You have received ${amount} from ${senderName}. \n Reference: \n\n ${reference}\n\n Collect it from any Zuka station. Make sure to bring your ID`
             
             sendSMS(senderNumber, senderText);
             
             sendSMS(receiverNumber, receiverText);
             
             alert("Money sent: unique id is: "+reference);
-        }
+        })
+        .catch(function(error) {
+            console.error("Error writing document: ", error);
+        });*/
+    
+    if(vendorAmount < amount){
+        alert('You do not have enough money to send');
+        window.location.reload();
+    }
+    
+    var receiver = JSON.parse(localStorage.motherloadString)[receiverNumber];
+    
+    if(receiver == undefined){
+        //create receiver
+        db.collection("users").doc(receiverNumber).set({
+            id: null,
+            name: null,
+            surname: null,
+            company: null,
+            cellphone: receiverNumber,
+            pass: null,
+            amount: amount,
+            timestamp: Date.now()
+        })
+            .then(function() {
+                console.log("new user created");
+                var newVendorAmount = vendorAmount - amount;
+                updateSenderAmount(localStorage.number,newVendorAmount);
+            
+                //send smses
+                var senderText = `Hi ${senderName}, \n You just sent ${amount} to ${receiverNumber}. \n Reference number:\n\n ${reference}. \n\n MAKE SURE YOUR FRIEND BRINGS AND ID TO COLLECT MONEY!`
+
+                var receiverText = `Hi there, \n You have received ${amount} from ${senderName}. \n Reference: \n\n ${reference}\n\n Collect it from any Zuka station. Make sure to bring your ID`
+
+                sendSMS(senderNumber, senderText);
+
+                sendSMS(receiverNumber, receiverText);
+            
+                //add to transaction load
+            
+                
+            })
+            .catch(function(error) {
+                console.error("Error writing document: ", error);
+            });
+        
+    }
+    else{
+        var newVendorAmount = vendorAmount - amount;
+        var newReceiverAmount = parseInt(receiver.amount) + amount;
+        
+        updateReceiverAmount(receiverNumber,newReceiverAmount);
+        updateSenderAmount(vendorNumber,newVendorAmount);
+        
+        //send smses
+        
+        //send smses
+        var senderText = `Hi ${senderName}, \n You just sent ${amount} to ${receiverNumber}. \n Reference number:\n\n ${reference}. \n\n MAKE SURE YOUR FRIEND BRINGS AND ID TO COLLECT MONEY!`
+
+        var receiverText = `Hi there, \n You have received ${amount} from ${senderName}. \n Reference: \n\n ${reference}\n\n Collect it from any Zuka station. Make sure to bring your ID`
+
+        sendSMS(senderNumber, senderText);
+
+        sendSMS(receiverNumber, receiverText);
+        
+        
+        //add to log
+        
+        window.location.reload();
+        
+    }
+
+}
+
+function updateSenderAmount(number, newAmount){
+    
+    var db = firebase.firestore();
+    
+    var toBeUpdated = db.collection("users").doc(number);
+
+    // Set the "capital" field of the city 'DC'
+    return toBeUpdated.update({
+        amount:parseInt(newAmount)
+    })
+    .then(function() {
+        console.log("transaction complete!");
+    })
+    .catch(function(error) {
+        // The document probably doesn't exist.
+        console.error("Error updating document: ", error);
     });
+    
+}
 
-    xhr.open("POST", "https://api.airtable.com/v0/appn8TIzmT0d92L4k/transactions?api_key=keynre40bTqHjQ7AD", false);
-    xhr.setRequestHeader("Content-Type", "application/json");
+function updateReceiverAmount(number, newAmount){
+    
+    console.log('called');
+    
+    var db = firebase.firestore();
+    
+    var toBeUpdated = db.collection("users").doc(number);
 
-    xhr.send(data);
-
+    // Set the "capital" field of the city 'DC'
+    return toBeUpdated.update({
+        amount:parseInt(newAmount)
+    })
+    .then(function() {
+        console.log("transaction complete!");
+    })
+    .catch(function(error) {
+        // The document probably doesn't exist.
+        console.error("Error updating document: ", error);
+    });
+    
 }
 
 function sendSMS(number,message){
@@ -143,7 +246,7 @@ function sendSMS(number,message){
       }
     });
 
-    xhr.open("POST", `https://rest.nexmo.com/sms/json?api_key=d6726b9a&api_secret=005e2f3453ccb56c&to=${number}&from=NEXMO&text=${message}`);
+    xhr.open("POST", `https://rest.nexmo.com/sms/json?api_key=d6726b9a&api_secret=005e2f3453ccb56c&to=${number}&from=NEXMO&text=${message}`,false);
 
     xhr.send(data);
 }
@@ -236,62 +339,70 @@ function signup(){
     var id = encrypt(document.getElementById("signUpId").value);
     var name = document.getElementById("signUpName").value;
     var surname = document.getElementById("signUpSurname").value;
-    var company = "+"+document.getElementById("signUpCompany").value;
-    var cellphone = document.getElementById("signUpCellphone").value;
+    var company = document.getElementById("signUpCompany").value;
+    var cellphone = "+"+document.getElementById("signUpCellphone").value;
     var pass = encrypt(document.getElementById("signUpPass").value);
     var amount = 0;
-
-    $.post("https://api.airtable.com/v0/appn8TIzmT0d92L4k/merchants?api_key=keynre40bTqHjQ7AD", {
-            "fields": {
-                "Name": name,
-                "Surname": surname,
-                "ID": id,
-                "Company": company,
-                "Cellphone": cellphone,
-                "Pass": pass,
-                "Amount" : amount
-            }
-        },
-        function (data, status) {
-            console.log("Data: " + data + "\nStatus: " + status);
-            alert("Your registration was "+status);
-            window.location.reload();
+    
+    var db = firebase.firestore();
+    
+    db.collection("users").doc(cellphone).set({
+        id: id,
+        name: name,
+        surname: surname,
+        company: company,
+        cellphone: cellphone,
+        pass: pass,
+        amount: 0,
+        timestamp: Date.now()
+    })
+        .then(function() {
+            console.log("Document successfully written!");
+            alert('You have successfully been registered!');
+            window.location.href="login.html"
+        })
+        .catch(function(error) {
+            console.error("Error writing document: ", error);
         });
 }
 
 function login() {
     
-    var cellphone = document.getElementById("loginCellphone").value;
+    var cellphone = "+"+document.getElementById("loginCellphone").value;
     var pass = document.getElementById("loginPass").value;
-
-    var merchants = getInfo("https://api.airtable.com/v0/appn8TIzmT0d92L4k/merchants?api_key=keynre40bTqHjQ7AD");
     
-    var counter = 0;
-
-    merchants.records.map(merchant => {
-
-        var merchantCellphone = merchant.fields.Cellphone;
-        var merchantPass = decrypt(merchant.fields.Pass)
-
-        if (merchantCellphone == cellphone && merchantPass == pass) {
-            counter++;
-            localStorage.name = merchant.fields.Name;
-            localStorage.surname = merchant.fields.Surname;
-            localStorage.company = merchant.fields.Company;
-            localStorage.amount = merchant.fields.Amount;
+    var db = firebase.firestore();
+    
+    var users = db.collection("users").doc(cellphone);
+    
+    users.get().then(function(doc) {
+        if (doc.exists) {
+            
+            if(pass == doc.data().pass){
+                alert('Password error');
+                window.location.href = "login.html";
+            }
+            
+            
+            localStorage.name = doc.data().name;
+            localStorage.surname = doc.data().surname;
+            localStorage.company = doc.data().company;
+            localStorage.amount = doc.data().amount;
+            localStorage.number = cellphone;
             alert(`Welcome back ${localStorage.name}`);
-            console.log(`This user has ${localStorage.amount} Emalangeni`)
+            console.log(`This user has ${localStorage.amount} Emalangeni`);
             window.location.href = "send.html";
+        } else {
+            // doc.data() will be undefined in this case
+            console.log("No such document!");
+            
+            alert('Looks like this user doesnt exist')
         }
-
-        return console.log(user)
-    })
+    }).catch(function(error) {
+        console.log("Error getting document:", error);
+    });
     
-    if(counter == 0){
-       alert("Looks like this user doesnt exist!"); 
-    }
     
-    toggleLoader();
 }
 
 function setUpHome(){

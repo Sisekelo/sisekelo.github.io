@@ -61,16 +61,6 @@
 				</div>
                 
                 <hr>
-                
-                <div class="wrap-input100 validate-input bg1" data-validate="Please Type Your Name">
-					<span class="label-input100">RECEIVER FULL NAME *</span>
-					<input class="input100" type="text" id="receiverName" placeholder="Receiver Name" value="Vukani">
-				</div>
-
-				<div class="wrap-input100 validate-input bg1 rs1-wrap-input100">
-					<span class="label-input100">RECEIVER ID *</span>
-					<input id="receiverID" class="input100" type="text" placeholder="Receiver ID number " value="testID">
-				</div>
 
 				<div class="wrap-input100 bg1 rs1-wrap-input100">
 					<span class="label-input100">Receiver Phone Number</span>
@@ -166,6 +156,66 @@
   gtag('js', new Date());
 
   gtag('config', 'UA-23581568-13');
+</script>
+    
+<!-- The core Firebase JS SDK is always required and must be listed first -->
+<script src="https://www.gstatic.com/firebasejs/7.1.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.1.0/firebase-firestore.js"></script>
+
+<!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+<script src="https://www.gstatic.com/firebasejs/7.1.0/firebase-analytics.js"></script>
+
+<script>
+  // Your web app's Firebase configuration
+  var firebaseConfig = {
+    apiKey: "AIzaSyBBffLBg9c7AMARybmAkI7SEMJLV84i3mM",
+    authDomain: "project-zuka.firebaseapp.com",
+    databaseURL: "https://project-zuka.firebaseio.com",
+    projectId: "project-zuka",
+    storageBucket: "",
+    messagingSenderId: "123512147225",
+    appId: "1:123512147225:web:4b320ebb9a053136274988",
+    measurementId: "G-7WVKPWLSP6"
+  };
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  firebase.analytics();
+</script>
+    
+<script>
+    
+    var db = firebase.firestore();
+    
+    var motherloadObject = {};
+    
+    localStorage.motherloadString = "";
+    
+    //add snap shot here and keep on updating local storage
+    db.collection("users").doc(localStorage.number)
+    .onSnapshot(function(doc) {
+        localStorage.name = doc.data().name;
+        localStorage.surname = doc.data().surname;
+        localStorage.company = doc.data().company;
+        localStorage.amount = doc.data().amount;
+        document.getElementById("title").innerHTML = `this user has ${localStorage.amount}`;
+    });
+    
+    //add snap shot here and keep on updating local storage
+    
+    db.collection("users").onSnapshot((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+            
+            var number = doc.id;
+            var data = doc.data();
+            
+            motherloadObject[number] = data;
+            
+        });
+        
+        localStorage.motherloadString = JSON.stringify(motherloadObject)
+    });
+    
 </script>
 
 </body>
