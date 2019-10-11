@@ -5,6 +5,7 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <!--===============================================================================================-->
 	<link rel="icon" type="image/png" href="images/icons/favicon.ico"/>
 <!--===============================================================================================-->
@@ -35,15 +36,23 @@
 
 	<div class="container-contact100">
 		<div class="wrap-contact100">
-			<form class="contact100-form validate-form" onsubmit="sendMoney()">
+			<form class="contact100-form validate-form" onsubmit="sendMoney()" id="sendForm">
+                
+                
+                
+				<span class="contact100-form-title">
+					Send Money
+				</span>
                 
                 <span class="contact100-form-title" id="title">
 					
 				</span>
                 
-				<span class="contact100-form-title">
-					Send Money
-				</span>
+                <div id="loader" style="display: none" class="loader">
+                    <div class="spinner-border text-primary" role="status">
+                      <span class="sr-only">Loading...</span>
+                    </div>
+                </div>
 
 				<div class="wrap-input100 validate-input bg1" data-validate="Please Type Your Name">
 					<span class="label-input100">SENDER FULL NAME *</span>
@@ -69,7 +78,7 @@
                 
                 <div class="wrap-input100 bg1 rs1-wrap-input100">
 					<span class="label-input100">Amount</span>
-					<input class="input100" id="amount" type="text" placeholder="How much?">
+					<input class="input100" id="amount" type="number" placeholder="How much?" min="1">
 				</div>
 			</form>
             <div class="container-contact100-form-btn">

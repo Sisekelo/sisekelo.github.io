@@ -77,6 +77,8 @@
 
 function sendMoney() {
     
+    toggleLoader();
+    
     var senderName = document.getElementById("senderName").value;
     var senderID = encrypt(document.getElementById("senderID").value).toString();
     var senderNumber = document.getElementById("senderNumber").value;
@@ -153,7 +155,16 @@ function sendMoney() {
 
                 sendSMS(receiverNumber, receiverText);
             
-                //add to transaction load
+                
+            
+                //TO DO: add to transaction load
+            
+                toggleLoader();
+            
+            
+                //resetform
+                resetForm(sendForm);
+                
             
                 
             })
@@ -172,7 +183,7 @@ function sendMoney() {
         //send smses
         
         //send smses
-        var senderText = `Hi ${senderName}, \n You just sent ${amount} to ${receiverNumber}. \n Reference number:\n\n ${reference}. \n\n MAKE SURE YOUR FRIEND BRINGS AND ID TO COLLECT MONEY!`
+        var senderText = `Hi ${senderName}, \n You sent ${amount} to ${receiverNumber}. \n Reference number:\n\n ${reference}. \n\n MAKE SURE YOUR FRIEND BRINGS AND ID TO COLLECT MONEY!`
 
         var receiverText = `Hi there, \n You have received ${amount} from ${senderName}. \n Reference: \n\n ${reference}\n\n Collect it from any Zuka station. Make sure to bring your ID`
 
@@ -183,7 +194,8 @@ function sendMoney() {
         
         //add to log
         
-        window.location.reload();
+        toggleLoader();
+        resetForm("sendForm");
         
     }
 
@@ -233,22 +245,12 @@ function updateReceiverAmount(number, newAmount){
 
 function sendSMS(number,message){
     
-    
-    var data = new FormData();
-    data.append("text", message);
-
-    var xhr = new XMLHttpRequest();
-    xhr.withCredentials = true;
-
-    xhr.addEventListener("readystatechange", function () {
-      if (this.readyState === 4) {
-        console.log(this.responseText);
-      }
-    });
-
-    xhr.open("POST", `https://rest.nexmo.com/sms/json?api_key=d6726b9a&api_secret=005e2f3453ccb56c&to=${number}&from=NEXMO&text=${message}`,false);
-
-    xhr.send(data);
+    $.post("https://cors-anywhere.herokuapp.com/https://rest.nexmo.com/sms/json?api_key=d6726b9a&api_secret=005e2f3453ccb56c&to=${number}&from=NEXMO&text=${message}", {
+        },
+        function (data, status) {
+            console.log("Data: " + data + "\nStatus: " + status);
+            alert(""+status);
+        });
 }
 
 function getDetails(){
@@ -367,6 +369,7 @@ function signup(){
 }
 
 function login() {
+    toggleLoader();
     
     var cellphone = "+"+document.getElementById("loginCellphone").value;
     var pass = document.getElementById("loginPass").value;
@@ -389,8 +392,8 @@ function login() {
             localStorage.company = doc.data().company;
             localStorage.amount = doc.data().amount;
             localStorage.number = cellphone;
-            alert(`Welcome back ${localStorage.name}`);
             console.log(`This user has ${localStorage.amount} Emalangeni`);
+            toggleLoader();
             window.location.href = "send.html";
         } else {
             // doc.data() will be undefined in this case
@@ -400,6 +403,7 @@ function login() {
         }
     }).catch(function(error) {
         console.log("Error getting document:", error);
+        alert(error)
     });
     
     
@@ -407,4 +411,20 @@ function login() {
 
 function setUpHome(){
     document.getElementById("title").innerHTML = `this user has ${localStorage.amount}`;
+}
+
+function toggleLoader(){
+    
+    var loader = document.getElementById("loader").style.display;
+    
+    if(loader == "block"){
+        document.getElementById("loader").style.display = "none";
+    }
+    else{
+        document.getElementById("loader").style.display = "block";
+    }
+}
+
+function resetForm(id){
+    document.getElementById(id).reset();
 }
