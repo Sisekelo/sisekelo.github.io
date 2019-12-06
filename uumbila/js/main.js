@@ -254,7 +254,7 @@ function confirmOrder() {
             
             sendConfirmedOrder(data)
           } else {
-            window.reload();
+            document.getElementById('sendForm').reset();
           }
     }
     
@@ -274,7 +274,8 @@ function sendConfirmedOrder(data){
                 xhr.addEventListener("readystatechange", function () {
                     if (this.readyState === 4) {
                         console.log(this.responseText);
-                        window.location.reload();
+                        
+                        document.getElementById('sendForm').reset();
                     }
                 });
 
@@ -295,4 +296,9 @@ function updatePrice(){
     
     amount.innerHTML = totalAmount;
     
+}
+
+function setUpHome() {
+    var txt = `Welcome back, ${localStorage.umbilaName}`;
+    document.getElementById('title').innerHTML = txt
 }
